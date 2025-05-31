@@ -1,13 +1,13 @@
 {
   "name": "git-worktree-cursor",
   "displayName": "Git Worktree + Cursor Launcher",
-  "description": "Create Git worktrees and open them in Cursor editor",
-  "version": "0.0.1",
+  "description": "Easily manage Git worktrees and open them in Cursor editor with a beautiful sidebar interface",
+  "version": "1.0.0",
   "publisher": "your-publisher-name",
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/git-worktree-extension"
+    "url": "https://github.com/your-username/git-worktree-cursor"
   },
   "engines": {
     "vscode": "^1.75.0"
@@ -47,7 +47,7 @@
         {
           "id": "git-worktree",
           "title": "Git Worktree",
-          "icon": "$(git-branch)"
+          "icon": "./icon.svg"
         }
       ]
     },
@@ -56,7 +56,7 @@
         {
           "id": "gitWorktreeExplorer",
           "name": "Worktrees",
-          "icon": "$(git-branch)",
+          "icon": "./icon.svg",
           "contextualTitle": "Git Worktree Explorer"
         }
       ]
