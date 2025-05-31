@@ -7,7 +7,7 @@
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/git-worktree-gui"
+    "url": "https://github.com/link2004/git-worktree-gui"
   },
   "engines": {
     "vscode": "^1.100.0"
