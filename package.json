@@ -10,7 +10,7 @@
     "url": "https://github.com/your-username/git-worktree-cursor"
   },
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.100.0"
   },
   "categories": [
     "Other",
