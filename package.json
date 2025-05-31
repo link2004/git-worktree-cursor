@@ -2,12 +2,12 @@
   "name": "git-worktree-gui",
   "displayName": "Git Worktree + Cursor Launcher",
   "description": "Easily manage Git worktrees and open them in Cursor editor with a beautiful sidebar interface",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "RikuOgawa",
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/link2004/git-worktree-gui"
+    "url": "https://github.com/link2004/git-worktree-extention"
   },
   "engines": {
     "vscode": "^1.74.0"
