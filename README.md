@@ -14,15 +14,17 @@ A powerful VS Code extension that streamlines Git worktree management with autom
 ## 📦 Installation
 
 ### From VS Code Marketplace
+
 1. Open VS Code
 2. Go to Extensions (Cmd/Ctrl + Shift + X)
 3. Search for "Git Worktree + Cursor Launcher"
 4. Click Install
 
 ### For Development
+
 ```bash
-git clone https://github.com/your-username/git-worktree-cursor
-cd git-worktree-cursor
+git clone https://github.com/your-username/git-worktree
+cd git-worktree
 npm install
 npm run compile
 ```
@@ -32,12 +34,14 @@ npm run compile
 ### Creating a New Worktree
 
 **From Sidebar:**
+
 1. Click the Git Worktree icon in the Activity Bar (left sidebar)
 2. Click the **+** button in the Worktrees view
 3. Enter your branch name (e.g., `feature/new-feature`)
 4. The worktree will be created and automatically opened in Cursor
 
 **From Command Palette:**
+
 1. Press `Cmd/Ctrl + Shift + P`
 2. Run "Git Worktree: Add and Open in Cursor"
 3. Enter your branch name
@@ -50,9 +54,11 @@ Click the Git Worktree icon in the Activity Bar to see all worktrees. The main w
 ### Deleting Worktrees
 
 **Option 1: Individual Delete**
+
 - Click the trash icon (🗑️) next to any worktree in the sidebar
 
 **Option 2: Bulk Delete**
+
 - Run "Git Worktree: Delete" from the Command Palette
 - Select multiple worktrees using checkboxes
 - Confirm deletion
@@ -60,6 +66,7 @@ Click the Git Worktree icon in the Activity Bar to see all worktrees. The main w
 ### Directory Structure
 
 Worktrees are automatically organized:
+
 ```
 parent-directory/
 ├── your-repo/                 (main repository)
@@ -71,11 +78,11 @@ parent-directory/
 
 ## 📋 Commands
 
-| Command | Description |
-|---------|-------------|
-| `Git Worktree: Add and Open in Cursor` | Create a new worktree and open in Cursor |
-| `Git Worktree: Delete` | Delete existing worktrees with multi-select |
-| `Refresh Worktrees` | Manually refresh the worktree list |
+| Command                                | Description                                 |
+| -------------------------------------- | ------------------------------------------- |
+| `Git Worktree: Add and Open in Cursor` | Create a new worktree and open in Cursor    |
+| `Git Worktree: Delete`                 | Delete existing worktrees with multi-select |
+| `Refresh Worktrees`                    | Manually refresh the worktree list          |
 
 ## ⚙️ Requirements
 
@@ -95,22 +102,26 @@ parent-directory/
 ## 🔧 Troubleshooting
 
 ### "cursor command not found"
+
 1. Open Cursor editor
 2. Press `Cmd+Shift+P` → `Shell Command: Install 'cursor' command in PATH`
 3. Restart your terminal/VS Code
 
 ### Worktree creation fails
+
 - Ensure you're in a Git repository
 - Check if the branch name already exists
 - Verify write permissions for the parent directory
 
 ### Extension not showing in sidebar
+
 - Reload VS Code window (`Cmd/Ctrl + R`)
 - Check if the extension is enabled
 
 ## 📝 Release Notes
 
 ### 1.0.0 - Initial Release
+
 - ✅ Sidebar interface for worktree management
 - ✅ Automatic worktree creation with Cursor integration
 - ✅ Smart directory organization (`<repo>-worktree` structure)

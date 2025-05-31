@@ -1,13 +1,13 @@
 {
-  "name": "git-worktree-cursor",
+  "name": "git-worktree",
   "displayName": "Git Worktree + Cursor Launcher",
   "description": "Easily manage Git worktrees and open them in Cursor editor with a beautiful sidebar interface",
   "version": "1.0.0",
-  "publisher": "your-publisher-name",
+  "publisher": "RikuOgawa",
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/git-worktree-cursor"
+    "url": "https://github.com/your-username/git-worktree"
   },
   "engines": {
     "vscode": "^1.100.0"
@@ -27,17 +27,17 @@
   "contributes": {
     "commands": [
       {
-        "command": "git-worktree-cursor.addWorktree",
+        "command": "git-worktree.addWorktree",
         "title": "Git Worktree: Add and Open in Cursor",
         "icon": "$(add)"
       },
       {
-        "command": "git-worktree-cursor.deleteWorktree",
+        "command": "git-worktree.deleteWorktree",
         "title": "Git Worktree: Delete",
         "icon": "$(trash)"
       },
       {
-        "command": "git-worktree-cursor.refreshWorktrees",
+        "command": "git-worktree.refreshWorktrees",
         "title": "Refresh Worktrees",
         "icon": "$(refresh)"
       }
@@ -64,19 +64,19 @@
     "menus": {
       "view/title": [
         {
-          "command": "git-worktree-cursor.addWorktree",
+          "command": "git-worktree.addWorktree",
           "when": "view == gitWorktreeExplorer",
           "group": "navigation@1"
         },
         {
-          "command": "git-worktree-cursor.refreshWorktrees",
+          "command": "git-worktree.refreshWorktrees",
           "when": "view == gitWorktreeExplorer",
           "group": "navigation@2"
         }
       ],
       "view/item/context": [
         {
-          "command": "git-worktree-cursor.deleteWorktree",
+          "command": "git-worktree.deleteWorktree",
           "when": "view == gitWorktreeExplorer && viewItem == worktree",
           "group": "inline"
         }
