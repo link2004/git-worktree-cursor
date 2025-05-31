@@ -80,7 +80,7 @@ class WorktreeProvider implements vscode.TreeDataProvider<WorktreeItem> {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log("Git Worktree + Cursor Launcher is now active!");
+  console.log("Git Worktree + cursor Editor is now active!");
 
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   const workspaceRoot = workspaceFolder?.uri.fsPath;
@@ -91,13 +91,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register refresh command
   let refreshDisposable = vscode.commands.registerCommand(
-    "git-worktree-gui.refreshWorktrees",
+    "git-worktree-cursor.refreshWorktrees",
     () => {
       worktreeProvider.refresh();
     }
   );
 
-  let disposable = vscode.commands.registerCommand("git-worktree-gui.addWorktree", async () => {
+  let disposable = vscode.commands.registerCommand("git-worktree-cursor.addWorktree", async () => {
     try {
       // Get the workspace folder
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
@@ -181,14 +181,14 @@ export function activate(context: vscode.ExtensionContext) {
         }
       );
     } catch (error) {
-      console.error("Error in git-worktree-gui.addWorktree:", error);
+      console.error("Error in git-worktree-cursor.addWorktree:", error);
     }
   });
 
   context.subscriptions.push(disposable);
 
   let deleteDisposable = vscode.commands.registerCommand(
-    "git-worktree-gui.deleteWorktree",
+    "git-worktree-cursor.deleteWorktree",
     async (item?: WorktreeItem) => {
       try {
         // Get the workspace folder
@@ -305,7 +305,7 @@ export function activate(context: vscode.ExtensionContext) {
           }
         );
       } catch (error) {
-        console.error("Error in git-worktree-gui.deleteWorktree:", error);
+        console.error("Error in git-worktree-cursor.deleteWorktree:", error);
         const errorMessage = error instanceof Error ? error.message : String(error);
         vscode.window.showErrorMessage(`Failed to list worktrees: ${errorMessage}`);
       }

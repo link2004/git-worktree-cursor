@@ -1,13 +1,14 @@
 # Change Log
 
-All notable changes to the "Git Worktree + Cursor Launcher" extension will be documented in this file.
+All notable changes to the "Git Worktree + cursor Editor" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
 ## [1.0.0] - 2024-01-XX
 
 ### Added
-- Initial release of Git Worktree + Cursor Launcher
+
+- Initial release of Git Worktree + cursor Editor
 - Sidebar interface in VS Code Activity Bar for worktree management
 - Create new Git worktrees with automatic branch creation
 - Automatic opening of new worktrees in Cursor editor
@@ -21,6 +22,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Error handling with user-friendly messages
 
 ### Technical Details
+
 - Built with TypeScript and VS Code Extension API
 - Uses Git CLI for worktree operations
 - Integrates with Cursor editor via command line

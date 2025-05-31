@@ -1,4 +1,4 @@
-# Git Worktree + Cursor Launcher
+# Git Worktree + cursor Editor
 
 A VS Code extension that simplifies Git worktree management with seamless Cursor editor integration. Create, view, and delete Git worktrees directly from VS Code's interface.
 
@@ -17,7 +17,7 @@ A VS Code extension that simplifies Git worktree management with seamless Cursor
 
 1. Open VS Code
 2. Go to Extensions (Cmd/Ctrl + Shift + X)
-3. Search for "Git Worktree + Cursor Launcher"
+3. Search for "Git Worktree + cursor Editor"
 4. Click Install
 
 ## 🚀 How to Use
@@ -27,7 +27,6 @@ A VS Code extension that simplifies Git worktree management with seamless Cursor
 1. **Open the Worktree Explorer**
    - Look for the Git Worktree icon in VS Code's Activity Bar (left sidebar)
    - Click it to open the Worktree Explorer panel
-   
 2. **Understanding the Display**
    - Each worktree shows its branch name
    - The main worktree is marked with "(main)" and a git-branch icon
@@ -38,12 +37,10 @@ A VS Code extension that simplifies Git worktree management with seamless Cursor
 
 1. **Click the + Button**
    - In the Worktree Explorer panel, click the **+** icon in the top toolbar
-   
 2. **Enter Branch Name**
    - A prompt will appear asking for the branch name
    - Use descriptive names like `feature/user-auth` or `bugfix/login-issue`
    - Only use letters, numbers, hyphens, underscores, and forward slashes
-   
 3. **Automatic Actions**
    - The extension creates a new Git worktree
    - Creates a new branch with your specified name
@@ -53,11 +50,13 @@ A VS Code extension that simplifies Git worktree management with seamless Cursor
 ### Deleting Worktrees
 
 **Method 1: Right-Click Delete (Single)**
+
 1. Right-click on any worktree (except main) in the explorer
 2. Select "Delete Worktree"
 3. Confirm the deletion when prompted
 
 **Method 2: Command Palette (Multiple)**
+
 1. Open Command Palette (Cmd/Ctrl + Shift + P)
 2. Type and select "Git Worktree: Delete"
 3. Check the worktrees you want to delete
@@ -84,6 +83,7 @@ your-projects-folder/
 ```
 
 Each worktree is a complete, independent copy of your repository where you can:
+
 - Switch branches without affecting other work
 - Run different versions simultaneously
 - Test changes in isolation
@@ -92,11 +92,11 @@ Each worktree is a complete, independent copy of your repository where you can:
 
 Access these through the Command Palette (Cmd/Ctrl + Shift + P):
 
-| Command | What it Does |
-|---------|--------------|
-| `Git Worktree: Add and Open in Cursor` | Creates a new worktree and opens it in Cursor |
-| `Git Worktree: Delete` | Shows a list to select and delete multiple worktrees |
-| `Git Worktree: Refresh` | Manually updates the worktree list |
+| Command                                | What it Does                                         |
+| -------------------------------------- | ---------------------------------------------------- |
+| `Git Worktree: Add and Open in Cursor` | Creates a new worktree and opens it in Cursor        |
+| `Git Worktree: Delete`                 | Shows a list to select and delete multiple worktrees |
+| `Git Worktree: Refresh`                | Manually updates the worktree list                   |
 
 ## ⚙️ Requirements
 
