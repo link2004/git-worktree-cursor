@@ -13,4 +13,3 @@ test-repo/**
 *.vsix
 .git/**
 .github/**
-*.svg
