@@ -23,8 +23,8 @@ A powerful VS Code extension that streamlines Git worktree management with autom
 ### For Development
 
 ```bash
-git clone https://github.com/your-username/git-worktree
-cd git-worktree
+git clone https://github.com/your-username/git-worktree-gui
+cd git-worktree-gui
 npm install
 npm run compile
 ```

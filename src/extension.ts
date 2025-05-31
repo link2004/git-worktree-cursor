@@ -90,11 +90,14 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.registerTreeDataProvider("gitWorktreeExplorer", worktreeProvider);
 
   // Register refresh command
-  let refreshDisposable = vscode.commands.registerCommand("git-worktree.refreshWorktrees", () => {
-    worktreeProvider.refresh();
-  });
+  let refreshDisposable = vscode.commands.registerCommand(
+    "git-worktree-gui.refreshWorktrees",
+    () => {
+      worktreeProvider.refresh();
+    }
+  );
 
-  let disposable = vscode.commands.registerCommand("git-worktree.addWorktree", async () => {
+  let disposable = vscode.commands.registerCommand("git-worktree-gui.addWorktree", async () => {
     try {
       // Get the workspace folder
       const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
@@ -178,14 +181,14 @@ export function activate(context: vscode.ExtensionContext) {
         }
       );
     } catch (error) {
-      console.error("Error in git-worktree.addWorktree:", error);
+      console.error("Error in git-worktree-gui.addWorktree:", error);
     }
   });
 
   context.subscriptions.push(disposable);
 
   let deleteDisposable = vscode.commands.registerCommand(
-    "git-worktree.deleteWorktree",
+    "git-worktree-gui.deleteWorktree",
     async (item?: WorktreeItem) => {
       try {
         // Get the workspace folder
@@ -302,7 +305,7 @@ export function activate(context: vscode.ExtensionContext) {
           }
         );
       } catch (error) {
-        console.error("Error in git-worktree.deleteWorktree:", error);
+        console.error("Error in git-worktree-gui.deleteWorktree:", error);
         const errorMessage = error instanceof Error ? error.message : String(error);
         vscode.window.showErrorMessage(`Failed to list worktrees: ${errorMessage}`);
       }

@@ -1,5 +1,5 @@
 {
-  "name": "git-worktree",
+  "name": "git-worktree-gui",
   "displayName": "Git Worktree + Cursor Launcher",
   "description": "Easily manage Git worktrees and open them in Cursor editor with a beautiful sidebar interface",
   "version": "1.0.0",
@@ -7,7 +7,7 @@
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/git-worktree"
+    "url": "https://github.com/your-username/git-worktree-gui"
   },
   "engines": {
     "vscode": "^1.100.0"
@@ -27,17 +27,17 @@
   "contributes": {
     "commands": [
       {
-        "command": "git-worktree.addWorktree",
+        "command": "git-worktree-gui.addWorktree",
         "title": "Git Worktree: Add and Open in Cursor",
         "icon": "$(add)"
       },
       {
-        "command": "git-worktree.deleteWorktree",
+        "command": "git-worktree-gui.deleteWorktree",
         "title": "Git Worktree: Delete",
         "icon": "$(trash)"
       },
       {
-        "command": "git-worktree.refreshWorktrees",
+        "command": "git-worktree-gui.refreshWorktrees",
         "title": "Refresh Worktrees",
         "icon": "$(refresh)"
       }
@@ -45,14 +45,14 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "git-worktree",
+          "id": "git-worktree-gui",
           "title": "Git Worktree",
           "icon": "./icon.svg"
         }
       ]
     },
     "views": {
-      "git-worktree": [
+      "git-worktree-gui": [
         {
           "id": "gitWorktreeExplorer",
           "name": "Worktrees",
@@ -64,19 +64,19 @@
     "menus": {
       "view/title": [
         {
-          "command": "git-worktree.addWorktree",
+          "command": "git-worktree-gui.addWorktree",
           "when": "view == gitWorktreeExplorer",
           "group": "navigation@1"
         },
         {
-          "command": "git-worktree.refreshWorktrees",
+          "command": "git-worktree-gui.refreshWorktrees",
           "when": "view == gitWorktreeExplorer",
           "group": "navigation@2"
         }
       ],
       "view/item/context": [
         {
-          "command": "git-worktree.deleteWorktree",
+          "command": "git-worktree-gui.deleteWorktree",
           "when": "view == gitWorktreeExplorer && viewItem == worktree",
           "group": "inline"
         }
