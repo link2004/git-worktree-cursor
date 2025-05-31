@@ -28,7 +28,11 @@
     "commands": [
       {
         "command": "git-worktree-cursor.addWorktree",
-        "title": "Git: Add Worktree and Open in Cursor"
+        "title": "Git Worktree: Add and Open in Cursor"
+      },
+      {
+        "command": "git-worktree-cursor.deleteWorktree",
+        "title": "Git Worktree: Delete"
       }
     ]
   },
