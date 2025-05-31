@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as path from 'path';
+import * as fs from 'fs';
 import { promisify } from 'util';
 
 const exec = promisify(cp.exec);
@@ -121,28 +122,21 @@ export function activate(context: vscode.ExtensionContext) {
                 return; // User cancelled
             }
 
-            // Prompt for parent directory
-            const parentDirUri = await vscode.window.showOpenDialog({
-                canSelectFiles: false,
-                canSelectFolders: true,
-                canSelectMany: false,
-                openLabel: 'Select Parent Directory for Worktree',
-                title: 'Select Parent Directory'
-            });
-
-            if (!parentDirUri || parentDirUri.length === 0) {
-                return; // User cancelled
-            }
-
-            const parentDir = parentDirUri[0].fsPath;
-
-            // Create branch suffix from branch name
-            // Convert feature/branch-name to feature-branch-name
-            const branchSuffix = branchName.replace(/\//g, '-');
+            // Create default parent directory structure
+            // Get the parent directory of the current repository
+            const repoParentDir = path.dirname(repoPath);
             
-            // Create worktree directory name
-            const worktreeDirName = `${repoName}-${branchSuffix}`;
-            const worktreePath = path.join(parentDir, worktreeDirName);
+            // Create the worktree parent directory name: <repo-name>-worktree
+            const worktreeParentDirName = `${repoName}-worktree`;
+            const worktreeParentPath = path.join(repoParentDir, worktreeParentDirName);
+            
+            // Create the worktree path: <repo-name>-worktree/<branch-name>
+            const worktreePath = path.join(worktreeParentPath, branchName);
+            
+            // Ensure the parent directory exists
+            if (!fs.existsSync(worktreeParentPath)) {
+                fs.mkdirSync(worktreeParentPath, { recursive: true });
+            }
 
             // Show progress
             await vscode.window.withProgress({
@@ -166,7 +160,7 @@ export function activate(context: vscode.ExtensionContext) {
                     progress.report({ increment: 100, message: 'Complete!' });
 
                     vscode.window.showInformationMessage(
-                        `Successfully created worktree '${worktreeDirName}' and opened in Cursor`
+                        `Successfully created worktree at '${worktreeParentDirName}/${branchName}' and opened in Cursor`
                     );
                     worktreeProvider.refresh();
                 } catch (error) {
