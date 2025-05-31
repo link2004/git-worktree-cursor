@@ -5,8 +5,88 @@ import { promisify } from 'util';
 
 const exec = promisify(cp.exec);
 
+interface Worktree {
+    path: string;
+    branch: string;
+    isMain: boolean;
+}
+
+class WorktreeItem extends vscode.TreeItem {
+    constructor(
+        public readonly worktree: Worktree,
+        public readonly collapsibleState: vscode.TreeItemCollapsibleState
+    ) {
+        super(worktree.branch, collapsibleState);
+        this.tooltip = this.worktree.path;
+        this.description = this.worktree.isMain ? '(main)' : '';
+        this.contextValue = this.worktree.isMain ? 'mainWorktree' : 'worktree';
+        this.iconPath = new vscode.ThemeIcon(this.worktree.isMain ? 'git-branch' : 'folder-opened');
+    }
+}
+
+class WorktreeProvider implements vscode.TreeDataProvider<WorktreeItem> {
+    private _onDidChangeTreeData: vscode.EventEmitter<WorktreeItem | undefined | null | void> = new vscode.EventEmitter<WorktreeItem | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<WorktreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
+
+    constructor(private workspaceRoot: string | undefined) {}
+
+    refresh(): void {
+        this._onDidChangeTreeData.fire();
+    }
+
+    getTreeItem(element: WorktreeItem): vscode.TreeItem {
+        return element;
+    }
+
+    getChildren(element?: WorktreeItem): Thenable<WorktreeItem[]> {
+        if (!this.workspaceRoot) {
+            vscode.window.showInformationMessage('No workspace folder open');
+            return Promise.resolve([]);
+        }
+
+        if (element) {
+            return Promise.resolve([]);
+        } else {
+            return this.getWorktrees();
+        }
+    }
+
+    private async getWorktrees(): Promise<WorktreeItem[]> {
+        try {
+            const { stdout: worktreeList } = await exec('git worktree list', { cwd: this.workspaceRoot });
+            const worktrees = worktreeList.trim().split('\n').map(line => {
+                const parts = line.trim().split(/\s+/);
+                const worktreePath = parts[0];
+                const branch = parts[2] ? parts[2].replace(/[\[\]]/g, '') : '';
+                return {
+                    path: worktreePath,
+                    branch: branch || 'main',
+                    isMain: worktreePath === this.workspaceRoot
+                };
+            });
+
+            return worktrees.map(wt => new WorktreeItem(wt, vscode.TreeItemCollapsibleState.None));
+        } catch (error) {
+            console.error('Error getting worktrees:', error);
+            return [];
+        }
+    }
+}
+
 export function activate(context: vscode.ExtensionContext) {
     console.log('Git Worktree + Cursor Launcher is now active!');
+
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    const workspaceRoot = workspaceFolder?.uri.fsPath;
+
+    // Create tree data provider
+    const worktreeProvider = new WorktreeProvider(workspaceRoot);
+    vscode.window.registerTreeDataProvider('gitWorktreeExplorer', worktreeProvider);
+
+    // Register refresh command
+    let refreshDisposable = vscode.commands.registerCommand('git-worktree-cursor.refreshWorktrees', () => {
+        worktreeProvider.refresh();
+    });
 
     let disposable = vscode.commands.registerCommand('git-worktree-cursor.addWorktree', async () => {
         try {
@@ -88,6 +168,7 @@ export function activate(context: vscode.ExtensionContext) {
                     vscode.window.showInformationMessage(
                         `Successfully created worktree '${worktreeDirName}' and opened in Cursor`
                     );
+                    worktreeProvider.refresh();
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : String(error);
                     vscode.window.showErrorMessage(`Failed to create worktree: ${errorMessage}`);
@@ -102,7 +183,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(disposable);
 
-    let deleteDisposable = vscode.commands.registerCommand('git-worktree-cursor.deleteWorktree', async () => {
+    let deleteDisposable = vscode.commands.registerCommand('git-worktree-cursor.deleteWorktree', async (item?: WorktreeItem) => {
         try {
             // Get the workspace folder
             const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
@@ -113,37 +194,48 @@ export function activate(context: vscode.ExtensionContext) {
 
             const repoPath = workspaceFolder.uri.fsPath;
 
-            // Get list of worktrees
-            const { stdout: worktreeList } = await exec('git worktree list', { cwd: repoPath });
-            const worktrees = worktreeList.trim().split('\n').map(line => {
-                const parts = line.trim().split(/\s+/);
-                const path = parts[0];
-                const branch = parts[2] ? parts[2].replace(/[\[\]]/g, '') : '';
-                return { path, branch, label: `${branch} (${path})` };
-            }).filter(wt => wt.path !== repoPath); // Exclude main worktree
+            let selected: Array<{ label: string; description: string; worktree: { path: string; branch: string } }> | undefined;
+            
+            if (item && !item.worktree.isMain) {
+                // Single item from context menu
+                selected = [{
+                    label: item.worktree.branch,
+                    description: item.worktree.path,
+                    worktree: item.worktree
+                }];
+            } else {
+                // Get list of worktrees
+                const { stdout: worktreeList } = await exec('git worktree list', { cwd: repoPath });
+                const worktrees = worktreeList.trim().split('\n').map(line => {
+                    const parts = line.trim().split(/\s+/);
+                    const path = parts[0];
+                    const branch = parts[2] ? parts[2].replace(/[\[\]]/g, '') : '';
+                    return { path, branch, label: `${branch} (${path})` };
+                }).filter(wt => wt.path !== repoPath); // Exclude main worktree
 
-            if (worktrees.length === 0) {
-                vscode.window.showInformationMessage('No worktrees found to delete');
-                return;
-            }
-
-            // Show quick pick with multi-select
-            const selected = await vscode.window.showQuickPick(
-                worktrees.map(wt => ({
-                    label: wt.label,
-                    description: wt.path,
-                    picked: false,
-                    worktree: wt
-                })),
-                {
-                    canPickMany: true,
-                    placeHolder: 'Select worktrees to delete',
-                    title: 'Delete Git Worktrees'
+                if (worktrees.length === 0) {
+                    vscode.window.showInformationMessage('No worktrees found to delete');
+                    return;
                 }
-            );
 
-            if (!selected || selected.length === 0) {
-                return; // User cancelled
+                // Show quick pick with multi-select
+                selected = await vscode.window.showQuickPick(
+                    worktrees.map(wt => ({
+                        label: wt.label,
+                        description: wt.path,
+                        picked: false,
+                        worktree: wt
+                    })),
+                    {
+                        canPickMany: true,
+                        placeHolder: 'Select worktrees to delete',
+                        title: 'Delete Git Worktrees'
+                    }
+                );
+
+                if (!selected || selected.length === 0) {
+                    return; // User cancelled
+                }
             }
 
             // Confirm deletion
@@ -163,10 +255,10 @@ export function activate(context: vscode.ExtensionContext) {
                 title: 'Deleting Git Worktrees',
                 cancellable: false
             }, async (progress) => {
-                const total = selected.length;
+                const total = selected!.length;
                 let completed = 0;
 
-                for (const item of selected) {
+                for (const item of selected!) {
                     progress.report({ 
                         increment: (100 / total), 
                         message: `Deleting ${item.worktree.branch}...` 
@@ -186,6 +278,7 @@ export function activate(context: vscode.ExtensionContext) {
                     vscode.window.showInformationMessage(
                         `Successfully deleted ${completed} worktree(s)`
                     );
+                    worktreeProvider.refresh();
                 }
             });
 
@@ -196,6 +289,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    context.subscriptions.push(refreshDisposable);
     context.subscriptions.push(deleteDisposable);
 }
 
