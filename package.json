@@ -88,9 +88,19 @@
       "properties": {
         "git-worktree-cursor.localFilePatterns": {
           "type": "array",
-          "description": "追加でコピーするローカルファイルのパターン",
-          "items": { "type": "string" },
-          "default": []
+          "description": "Patterns for additional local files to copy. Supports glob patterns like '*.log', 'config/*.json', '**/*.local'",
+          "items": { 
+            "type": "string",
+            "description": "Glob pattern (e.g. '*.log', 'config/*.json', '**/*.local')"
+          },
+          "default": [],
+          "examples": [
+            "*.log",
+            "config/*.json",
+            "**/*.local",
+            ".env*",
+            "secrets/*.yml"
+          ]
         }
       }
     }
