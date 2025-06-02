@@ -2,7 +2,7 @@
   "name": "git-worktree-cursor",
   "displayName": "Git Worktree + cursor Editor",
   "description": "Easily manage Git worktrees and open them in Cursor editor with a beautiful sidebar interface",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "publisher": "RikuOgawa",
   "icon": "icon.png",
   "repository": {
