@@ -257,15 +257,23 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         // Confirm deletion
+        const deleteMessage = `Are you sure you want to delete ${
+          selected.length
+        } worktree director${selected.length > 1 ? "ies" : "y"}?`;
+
         const confirm = await vscode.window.showWarningMessage(
-          `Are you sure you want to delete ${selected.length} worktree(s)? This will remove the directories permanently.`,
-          "Yes, Delete",
+          deleteMessage,
+          "Directory and Branch",
+          "Directory Only",
           "Cancel"
         );
 
-        if (confirm !== "Yes, Delete") {
+        if (confirm === "Cancel") {
           return;
         }
+
+        const deletionOption =
+          confirm === "Directory Only" ? "directory-only" : "directory-and-branch";
 
         // Delete selected worktrees
         await vscode.window.withProgress(
@@ -289,6 +297,20 @@ export function activate(context: vscode.ExtensionContext) {
                 await exec(`git worktree remove --force "${item.worktree.path}"`, {
                   cwd: repoPath,
                 });
+
+                // If user chose to delete branch as well
+                if (deletionOption === "directory-and-branch") {
+                  try {
+                    // Delete local branch
+                    await exec(`git branch -D "${item.worktree.branch}"`, {
+                      cwd: repoPath,
+                    });
+                  } catch (branchError) {
+                    // Branch might not exist or might be the current branch
+                    console.warn(`Failed to delete branch ${item.worktree.branch}:`, branchError);
+                  }
+                }
+
                 completed++;
               } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
@@ -299,7 +321,15 @@ export function activate(context: vscode.ExtensionContext) {
             }
 
             if (completed > 0) {
-              vscode.window.showInformationMessage(`Successfully deleted ${completed} worktree(s)`);
+              const successMessage =
+                deletionOption === "directory-and-branch"
+                  ? `Successfully deleted ${completed} worktree director${
+                      completed > 1 ? "ies" : "y"
+                    } and local branch${completed > 1 ? "es" : ""}`
+                  : `Successfully deleted ${completed} worktree director${
+                      completed > 1 ? "ies" : "y"
+                    }`;
+              vscode.window.showInformationMessage(successMessage);
               worktreeProvider.refresh();
             }
           }
