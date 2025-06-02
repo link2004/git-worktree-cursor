@@ -10,6 +10,7 @@ A VS Code extension that simplifies Git worktree management with seamless Cursor
 - 🗑️ **Easy Cleanup**: Delete single or multiple worktrees with confirmation
 - 📁 **Organized Structure**: Worktrees are automatically organized in a dedicated folder
 - 🔄 **Real-time Updates**: The worktree list refreshes automatically after operations
+- 📄 **Config File Sync**: `.env` and other local config files from any subdirectory are copied into new worktrees. Additional patterns can be configured via `git-worktree-cursor.localFilePatterns`.
 
 ## 📦 Installation
 

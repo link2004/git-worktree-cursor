@@ -81,6 +81,18 @@
           "group": "inline"
         }
       ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "Git Worktree + cursor Editor",
+      "properties": {
+        "git-worktree-cursor.localFilePatterns": {
+          "type": "array",
+          "description": "追加でコピーするローカルファイルのパターン",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
     }
   },
   "scripts": {
