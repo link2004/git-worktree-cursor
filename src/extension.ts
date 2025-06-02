@@ -6,6 +6,9 @@ import { promisify } from "util";
 
 const exec = promisify(cp.exec);
 
+// ローカルファイルのパターン定義
+const LOCAL_FILE_PATTERNS = [".env*", "*.local.*", "config.local.*", ".vscode/settings.json"];
+
 interface Worktree {
   path: string;
   branch: string;
@@ -23,6 +26,94 @@ class WorktreeItem extends vscode.TreeItem {
     this.contextValue = this.worktree.isMain ? "mainWorktree" : "worktree";
     this.iconPath = new vscode.ThemeIcon(this.worktree.isMain ? "git-branch" : "folder-opened");
   }
+}
+
+// ローカルファイルをコピーする関数
+async function copyLocalFiles(sourcePath: string, targetPath: string): Promise<void> {
+  try {
+    for (const pattern of LOCAL_FILE_PATTERNS) {
+      const sourceFiles = await findMatchingFiles(sourcePath, pattern);
+
+      for (const sourceFile of sourceFiles) {
+        const relativePath = path.relative(sourcePath, sourceFile);
+        const targetFile = path.join(targetPath, relativePath);
+
+        // ターゲットディレクトリが存在しない場合は作成
+        const targetDir = path.dirname(targetFile);
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+
+        // ファイルをコピー
+        if (fs.existsSync(sourceFile)) {
+          fs.copyFileSync(sourceFile, targetFile);
+          console.log(`Copied local file: ${relativePath}`);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error copying local files:", error);
+    // エラーが発生してもworktree作成は続行
+  }
+}
+
+async function findMatchingFiles(basePath: string, pattern: string): Promise<string[]> {
+  const matchingFiles: string[] = [];
+
+  try {
+    // glob的なパターンマッチングを簡易実装
+    if (pattern.includes("*")) {
+      const files = await getAllFiles(basePath);
+      const regex = patternToRegex(pattern);
+
+      for (const file of files) {
+        const relativePath = path.relative(basePath, file);
+        if (regex.test(relativePath)) {
+          matchingFiles.push(file);
+        }
+      }
+    } else {
+      // 直接パス指定の場合
+      const fullPath = path.join(basePath, pattern);
+      if (fs.existsSync(fullPath)) {
+        matchingFiles.push(fullPath);
+      }
+    }
+  } catch (error) {
+    console.error(`Error finding files for pattern ${pattern}:`, error);
+  }
+
+  return matchingFiles;
+}
+
+async function getAllFiles(dir: string, files: string[] = []): Promise<string[]> {
+  try {
+    const dirents = fs.readdirSync(dir, { withFileTypes: true });
+
+    for (const dirent of dirents) {
+      const fullPath = path.join(dir, dirent.name);
+
+      if (dirent.isDirectory()) {
+        // .git ディレクトリなどは除外
+        if (!dirent.name.startsWith(".git") && dirent.name !== "node_modules") {
+          await getAllFiles(fullPath, files);
+        }
+      } else {
+        files.push(fullPath);
+      }
+    }
+  } catch (error) {
+    // ディレクトリアクセスエラーは無視
+  }
+
+  return files;
+}
+
+function patternToRegex(pattern: string): RegExp {
+  // 簡易的なglob to regex変換
+  let regexPattern = pattern.replace(/\./g, "\\.").replace(/\*/g, ".*").replace(/\?/g, ".");
+
+  return new RegExp(`^${regexPattern}$`);
 }
 
 class WorktreeProvider implements vscode.TreeDataProvider<WorktreeItem> {
@@ -161,7 +252,12 @@ export function activate(context: vscode.ExtensionContext) {
             const gitCommand = `git worktree add "${worktreePath}" -b "${branchName}"`;
             await exec(gitCommand, { cwd: repoPath });
 
-            progress.report({ increment: 50, message: "Opening in Cursor..." });
+            progress.report({ increment: 30, message: "Copying local files..." });
+
+            // ローカルファイルをコピー
+            await copyLocalFiles(repoPath, worktreePath);
+
+            progress.report({ increment: 70, message: "Opening in Cursor..." });
 
             // Open in Cursor
             const cursorCommand = `cursor "${worktreePath}"`;
