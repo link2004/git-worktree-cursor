@@ -7,7 +7,13 @@ import { promisify } from "util";
 const exec = promisify(cp.exec);
 
 // ローカルファイルのパターン定義
-const LOCAL_FILE_PATTERNS = [".env*", "*.local.*", "config.local.*", ".vscode/settings.json", ".vercel"];
+const LOCAL_FILE_PATTERNS = [
+  ".env*",
+  "*.local.*",
+  "config.local.*",
+  ".vscode/settings.json",
+  ".vercel/",
+];
 
 interface Worktree {
   path: string;
@@ -32,88 +38,40 @@ class WorktreeItem extends vscode.TreeItem {
 async function copyLocalFiles(sourcePath: string, targetPath: string): Promise<void> {
   try {
     for (const pattern of LOCAL_FILE_PATTERNS) {
-      const sourceFiles = await findMatchingFiles(sourcePath, pattern);
+      if (pattern.endsWith("/")) {
+        // ディレクトリを丸ごとコピー
+        const dirName = pattern.slice(0, -1);
+        const sourceDir = path.join(sourcePath, dirName);
+        const targetDir = path.join(targetPath, dirName);
 
-      for (const sourceFile of sourceFiles) {
-        const relativePath = path.relative(sourcePath, sourceFile);
-        const targetFile = path.join(targetPath, relativePath);
-
-        // ターゲットディレクトリが存在しない場合は作成
-        const targetDir = path.dirname(targetFile);
-        if (!fs.existsSync(targetDir)) {
-          fs.mkdirSync(targetDir, { recursive: true });
+        if (fs.existsSync(sourceDir)) {
+          fs.cpSync(sourceDir, targetDir, { recursive: true });
+          console.log(`Copied directory: ${dirName}`);
         }
+      } else {
+        // ファイルをコピー（glob風の簡易マッチング）
+        const files = fs.readdirSync(sourcePath, { withFileTypes: true });
 
-        // ファイルをコピー
-        if (fs.existsSync(sourceFile)) {
-          fs.copyFileSync(sourceFile, targetFile);
-          console.log(`Copied local file: ${relativePath}`);
+        for (const file of files) {
+          if (file.isFile() && matchesPattern(file.name, pattern)) {
+            const sourceFile = path.join(sourcePath, file.name);
+            const targetFile = path.join(targetPath, file.name);
+            fs.copyFileSync(sourceFile, targetFile);
+            console.log(`Copied local file: ${file.name}`);
+          }
         }
       }
     }
   } catch (error) {
     console.error("Error copying local files:", error);
-    // エラーが発生してもworktree作成は続行
   }
 }
 
-async function findMatchingFiles(basePath: string, pattern: string): Promise<string[]> {
-  const matchingFiles: string[] = [];
-
-  try {
-    // glob的なパターンマッチングを簡易実装
-    if (pattern.includes("*")) {
-      const files = await getAllFiles(basePath);
-      const regex = patternToRegex(pattern);
-
-      for (const file of files) {
-        const relativePath = path.relative(basePath, file);
-        if (regex.test(relativePath)) {
-          matchingFiles.push(file);
-        }
-      }
-    } else {
-      // 直接パス指定の場合
-      const fullPath = path.join(basePath, pattern);
-      if (fs.existsSync(fullPath)) {
-        matchingFiles.push(fullPath);
-      }
-    }
-  } catch (error) {
-    console.error(`Error finding files for pattern ${pattern}:`, error);
-  }
-
-  return matchingFiles;
-}
-
-async function getAllFiles(dir: string, files: string[] = []): Promise<string[]> {
-  try {
-    const dirents = fs.readdirSync(dir, { withFileTypes: true });
-
-    for (const dirent of dirents) {
-      const fullPath = path.join(dir, dirent.name);
-
-      if (dirent.isDirectory()) {
-        // .git ディレクトリなどは除外
-        if (!dirent.name.startsWith(".git") && dirent.name !== "node_modules") {
-          await getAllFiles(fullPath, files);
-        }
-      } else {
-        files.push(fullPath);
-      }
-    }
-  } catch (error) {
-    // ディレクトリアクセスエラーは無視
-  }
-
-  return files;
-}
-
-function patternToRegex(pattern: string): RegExp {
-  // 簡易的なglob to regex変換
-  let regexPattern = pattern.replace(/\./g, "\\.").replace(/\*/g, ".*").replace(/\?/g, ".");
-
-  return new RegExp(`^${regexPattern}$`);
+// シンプルなパターンマッチング
+function matchesPattern(filename: string, pattern: string): boolean {
+  // 基本的なglob風パターンマッチング
+  const regex = pattern.replace(/\./g, "\\.").replace(/\*/g, ".*");
+  return new RegExp(`^${regex}$`).test(filename);
 }
 
 class WorktreeProvider implements vscode.TreeDataProvider<WorktreeItem> {
