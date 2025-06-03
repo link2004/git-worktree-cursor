@@ -7,7 +7,7 @@ import { promisify } from "util";
 const exec = promisify(cp.exec);
 
 // ローカルファイルのパターン定義
-const LOCAL_FILE_PATTERNS = [".env*", "*.local.*", "config.local.*", ".vscode/settings.json"];
+const LOCAL_FILE_PATTERNS = [".env*", "*.local.*", "config.local.*", ".vscode/settings.json", ".vercel*"];
 
 interface Worktree {
   path: string;
