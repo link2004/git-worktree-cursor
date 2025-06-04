@@ -18,6 +18,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Auto-refresh of worktree list after operations
 - Visual indicators to distinguish main worktree from feature worktrees
 - Progress notifications during worktree operations
+- Copy of `.env` and other local config files from subdirectories when creating a worktree
+- User-defined local file patterns via `git-worktree-cursor.localFilePatterns`
 - Input validation for branch names
 - Error handling with user-friendly messages
 

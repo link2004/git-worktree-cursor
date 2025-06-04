@@ -6,8 +6,21 @@ import { promisify } from "util";
 
 const exec = promisify(cp.exec);
 
-// ローカルファイルのパターン定義
-const LOCAL_FILE_PATTERNS = [".env*", "*.local.*", "config.local.*", ".vscode/settings.json"];
+// デフォルトのローカルファイルパターン
+const DEFAULT_LOCAL_FILE_PATTERNS = [
+  "**/.env*",
+  "**/*.local.*",
+  "**/config.local.*",
+  ".vscode/settings.json",
+];
+
+// 設定から追加のパターンを取得
+function getLocalFilePatterns(): string[] {
+  const configPatterns = vscode.workspace
+    .getConfiguration("git-worktree-cursor")
+    .get<string[]>("localFilePatterns", []);
+  return [...DEFAULT_LOCAL_FILE_PATTERNS, ...configPatterns];
+}
 
 interface Worktree {
   path: string;
@@ -31,7 +44,7 @@ class WorktreeItem extends vscode.TreeItem {
 // ローカルファイルをコピーする関数
 async function copyLocalFiles(sourcePath: string, targetPath: string): Promise<void> {
   try {
-    for (const pattern of LOCAL_FILE_PATTERNS) {
+    for (const pattern of getLocalFilePatterns()) {
       const sourceFiles = await findMatchingFiles(sourcePath, pattern);
 
       for (const sourceFile of sourceFiles) {
