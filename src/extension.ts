@@ -377,7 +377,7 @@ export function activate(context: vscode.ExtensionContext) {
           "Cancel"
         );
 
-        if (confirm === "Cancel") {
+        if (confirm !== "Directory and Branch" && confirm !== "Directory Only") {
           return;
         }
 
