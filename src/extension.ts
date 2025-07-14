@@ -5,6 +5,7 @@ import * as fs from "fs";
 import { promisify } from "util";
 
 const exec = promisify(cp.exec);
+const execFile = promisify(cp.execFile);
 
 // デフォルトのローカルファイルパターン
 const DEFAULT_LOCAL_FILE_PATTERNS = [
@@ -222,9 +223,25 @@ export function activate(context: vscode.ExtensionContext) {
           if (!value || value.trim() === "") {
             return "Branch name cannot be empty";
           }
-          // Basic validation for branch names
-          if (!/^[a-zA-Z0-9\/_-]+$/.test(value)) {
-            return "Branch name contains invalid characters";
+          // Check for path traversal attempts
+          if (value.includes("..") || value.includes("./") || value.includes("\\")) {
+            return "Branch name cannot contain path traversal characters (.. ./ \\)";
+          }
+          // Check for absolute paths
+          if (path.isAbsolute(value)) {
+            return "Branch name cannot be an absolute path";
+          }
+          // Improved validation for branch names (allow dots but not consecutive ones)
+          if (!/^[a-zA-Z0-9\/_.-]+$/.test(value)) {
+            return "Branch name contains invalid characters. Use only letters, numbers, /, _, -, and .";
+          }
+          // Prevent consecutive dots
+          if (/\.\./.test(value)) {
+            return "Branch name cannot contain consecutive dots (..)";
+          }
+          // Prevent starting or ending with special characters
+          if (/^[.\-_/]|[.\-_/]$/.test(value)) {
+            return "Branch name cannot start or end with ., -, _, or /";
           }
           return null;
         },
@@ -243,7 +260,13 @@ export function activate(context: vscode.ExtensionContext) {
       const worktreeParentPath = path.join(repoParentDir, worktreeParentDirName);
 
       // Create the worktree path: <repo-name>-worktree/<branch-name>
-      const worktreePath = path.join(worktreeParentPath, branchName);
+      const worktreePath = path.normalize(path.join(worktreeParentPath, branchName));
+      
+      // Security check: ensure the worktree path is within the expected parent directory
+      if (!worktreePath.startsWith(worktreeParentPath + path.sep) && worktreePath !== worktreeParentPath) {
+        vscode.window.showErrorMessage("Invalid worktree path detected for security reasons");
+        return;
+      }
 
       // Ensure the parent directory exists
       if (!fs.existsSync(worktreeParentPath)) {
@@ -262,8 +285,7 @@ export function activate(context: vscode.ExtensionContext) {
 
           try {
             // Execute git worktree add command
-            const gitCommand = `git worktree add "${worktreePath}" -b "${branchName}"`;
-            await exec(gitCommand, { cwd: repoPath });
+            await execFile("git", ["worktree", "add", worktreePath, "-b", branchName], { cwd: repoPath });
 
             progress.report({ increment: 30, message: "Copying local files..." });
 
@@ -273,8 +295,15 @@ export function activate(context: vscode.ExtensionContext) {
             progress.report({ increment: 70, message: "Opening in Cursor..." });
 
             // Open in Cursor
-            const cursorCommand = `cursor "${worktreePath}"`;
-            await exec(cursorCommand);
+            try {
+              await execFile("cursor", [worktreePath]);
+            } catch (cursorError) {
+              // If the cursor cannot be found, a warning is displayed but processing continues.
+              console.warn("Cursor command failed:", cursorError);
+              vscode.window.showWarningMessage(
+                "Worktree created successfully, but failed to open in Cursor. Please open manually."
+              );
+            }
 
             progress.report({ increment: 100, message: "Complete!" });
 
@@ -377,7 +406,7 @@ export function activate(context: vscode.ExtensionContext) {
           "Cancel"
         );
 
-        if (confirm === "Cancel") {
+        if (confirm === "Cancel" || confirm === undefined) {
           return;
         }
 
@@ -403,7 +432,7 @@ export function activate(context: vscode.ExtensionContext) {
 
               try {
                 // Remove worktree
-                await exec(`git worktree remove --force "${item.worktree.path}"`, {
+                await execFile("git", ["worktree", "remove", "--force", item.worktree.path], {
                   cwd: repoPath,
                 });
 
@@ -411,7 +440,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if (deletionOption === "directory-and-branch") {
                   try {
                     // Delete local branch
-                    await exec(`git branch -D "${item.worktree.branch}"`, {
+                    await execFile("git", ["branch", "-D", item.worktree.branch], {
                       cwd: repoPath,
                     });
                   } catch (branchError) {

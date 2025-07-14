@@ -2,7 +2,7 @@
   "name": "git-worktree-cursor",
   "displayName": "Git Worktree + cursor Editor",
   "description": "Easily manage Git worktrees and open them in Cursor editor with a beautiful sidebar interface",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "publisher": "RikuOgawa",
   "icon": "icon.png",
   "repository": {
@@ -89,7 +89,7 @@
         "git-worktree-cursor.localFilePatterns": {
           "type": "array",
           "description": "Patterns for additional local files to copy. Supports glob patterns like '*.log', 'config/*.json', '**/*.local'",
-          "items": { 
+          "items": {
             "type": "string",
             "description": "Glob pattern (e.g. '*.log', 'config/*.json', '**/*.local')"
           },
