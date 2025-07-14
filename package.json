@@ -24,6 +24,9 @@
     "workspace"
   ],
   "main": "./out/extension.js",
+  "activationEvents": [
+    "onView:gitWorktreeExplorer"
+  ],
   "contributes": {
     "commands": [
       {
